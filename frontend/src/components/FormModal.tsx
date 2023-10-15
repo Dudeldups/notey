@@ -1,23 +1,39 @@
 import { useForm } from "react-hook-form";
 import { Note } from "../models/note";
-import { NoteInput, createNote } from "../network/notes_api";
+import { NoteInput, createNote, updateNote } from "../network/notes_api";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 
-interface AddNoteModalProps {
+interface FormModalProps {
+  noteToEdit?: Note;
   dismissModal: () => void;
   onNoteSaved: (note: Note) => void;
 }
 
-const AddNoteModal = ({ dismissModal, onNoteSaved }: AddNoteModalProps) => {
+const FormModal = ({
+  noteToEdit,
+  dismissModal,
+  onNoteSaved,
+}: FormModalProps) => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<NoteInput>();
+  } = useForm<NoteInput>({
+    defaultValues: {
+      title: noteToEdit?.title || "",
+      text: noteToEdit?.text || "",
+    },
+  });
 
   const onSubmit = async (input: NoteInput) => {
     try {
-      const noteResponse = await createNote(input);
+      let noteResponse: Note;
+      if (noteToEdit) {
+        noteResponse = await updateNote(noteToEdit._id, input);
+      } else {
+        noteResponse = await createNote(input);
+      }
+
       onNoteSaved(noteResponse);
       dismissModal();
     } catch (error) {
@@ -30,7 +46,9 @@ const AddNoteModal = ({ dismissModal, onNoteSaved }: AddNoteModalProps) => {
       onSubmit={handleSubmit(onSubmit)}
       className="bg-gray-900 flex flex-col p-4 text-white">
       <div className="flex justify-between">
-        <h2 className="font-bold text-xl">Add a new note</h2>
+        <h2 className="font-bold text-xl">
+          {noteToEdit ? "Edit note" : "Add a new note"}
+        </h2>
         <button onClick={dismissModal}>
           <IoIosCloseCircleOutline className="text-3xl" />
         </button>
@@ -59,9 +77,9 @@ const AddNoteModal = ({ dismissModal, onNoteSaved }: AddNoteModalProps) => {
       <button
         disabled={isSubmitting}
         className="self-center rounded-lg bg-gradient-to-tr from-red-600 to-red-500 py-2 px-3 hover:scale-105 transition-transform font-semibold text-white">
-        Create note
+        {noteToEdit ? "Save" : "Create note"}
       </button>
     </form>
   );
 };
-export default AddNoteModal;
+export default FormModal;

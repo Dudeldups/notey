@@ -4,12 +4,15 @@ import Note from "./components/Note";
 import * as NotesApi from "./network/notes_api";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import AddNoteModal from "./components/AddNoteModal";
+import FormModal from "./components/FormModal";
+import { FaPlus } from "react-icons/fa";
 
 function App() {
   const [notes, setNotes] = useState<NoteModel[]>([]);
 
-  const [showAddNoteModal, setShowAddNoteModal] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
+
+  const [noteToEdit, setNoteToEdit] = useState<NoteModel | null>(null);
 
   useEffect(() => {
     async function loadNotes() {
@@ -18,6 +21,15 @@ function App() {
     }
     loadNotes();
   }, []);
+
+  async function deleteHandler(note: NoteModel) {
+    try {
+      await NotesApi.deleteNote(note._id);
+      setNotes(notes.filter(n => n._id !== note._id));
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-800 via-gray-800 to-gray-700 font-['Poppins']">
@@ -32,24 +44,45 @@ function App() {
             Except if you forget about this website
           </p>
           <button
-            className="rounded-lg bg-gradient-to-tr from-red-600 to-red-500 py-2 px-3 hover:scale-105 transition-transform font-semibold"
-            onClick={() => setShowAddNoteModal(true)}>
+            className="grid grid-flow-col gap-2 place-items-center mx-auto rounded-lg bg-gradient-to-tr from-red-600 to-red-500 py-2 px-3 hover:scale-105 transition-transform font-semibold"
+            onClick={() => setShowFormModal(true)}>
+            <FaPlus />
             Add new note
           </button>
         </div>
 
         <div className="grid gap-y-6 gap-x-4 sm:grid-cols-[repeat(auto-fit,minmax(19rem,1fr))]">
           {notes.map(note => (
-            <Note key={note._id} note={note} />
+            <Note
+              key={note._id}
+              note={note}
+              deleteHandler={deleteHandler}
+              onNoteClicked={setNoteToEdit}
+            />
           ))}
         </div>
 
-        {showAddNoteModal && (
-          <AddNoteModal
-            dismissModal={() => setShowAddNoteModal(false)}
+        {showFormModal && (
+          <FormModal
+            dismissModal={() => setShowFormModal(false)}
             onNoteSaved={newNote => {
               setNotes([...notes, newNote]);
-              setShowAddNoteModal(false);
+              setShowFormModal(false);
+            }}
+          />
+        )}
+        {noteToEdit && (
+          <FormModal
+            noteToEdit={noteToEdit}
+            dismissModal={() => {
+              setNoteToEdit(null);
+              setShowFormModal(false);
+            }}
+            onNoteSaved={updatedNote => {
+              setNotes(
+                notes.map(n => (n._id === updatedNote._id ? updatedNote : n))
+              );
+              setNoteToEdit(null);
             }}
           />
         )}
