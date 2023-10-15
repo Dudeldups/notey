@@ -9,10 +9,10 @@ const Navbar = () => {
           </span>
         </p>
 
-        <button className="rounded-lg bg-gradient-to-tr from-red-600 to-red-500 px-3 hover:scale-105 transition-transform font-semibold">
+        <button className="rounded-lg bg-white text-red-600 py-2 px-3 hover:scale-105 transition-transform font-semibold">
           Register
         </button>
-        <button className="rounded-lg bg-gradient-to-tr from-red-600 to-red-500 px-3 hover:scale-105 transition-transform font-semibold">
+        <button className="rounded-lg bg-white text-red-600 py-2 px-3 hover:scale-105 transition-transform font-semibold">
           Login
         </button>
       </div>
