@@ -42,44 +42,51 @@ const FormModal = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="bg-gray-900 flex flex-col p-4 text-white">
-      <div className="flex justify-between">
-        <h2 className="font-bold text-xl">
-          {noteToEdit ? "Edit note" : "Add a new note"}
-        </h2>
-        <button onClick={dismissModal}>
-          <IoIosCloseCircleOutline className="text-3xl" />
+    <div
+      className="absolute bg-gray-800 bg-opacity-30 inset-0 px-4 py-40"
+      onClick={dismissModal}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        onClick={e => e.stopPropagation()}
+        className="bg-gray-900 flex flex-col p-4 text-white max-w-xl mx-auto">
+        <div className="flex justify-between">
+          <h2 className="font-bold text-xl">
+            {noteToEdit ? "Edit note" : "Add a new note"}
+          </h2>
+          <button onClick={dismissModal}>
+            <IoIosCloseCircleOutline className="text-3xl" />
+          </button>
+        </div>
+        <label className="mt-3 font-semibold text-lg" htmlFor="title">
+          Title
+        </label>
+        <input
+          className="bg-gray-600 rounded-md p-2 text-white mb-2"
+          {...register("title", { required: "The title is required" })}
+          type="text"
+        />
+        {errors.title && (
+          <p className="font-bold text-sm text-red-500">
+            {errors.title.message}
+          </p>
+        )}
+
+        <label className="mt-3 font-semibold text-lg" htmlFor="textArea">
+          Text
+        </label>
+        <textarea
+          className="bg-gray-600 rounded-md p-2 text-white mb-4"
+          {...register("text")}
+          cols={5}
+          rows={5}></textarea>
+
+        <button
+          disabled={isSubmitting}
+          className="self-center rounded-lg bg-gradient-to-tr from-red-600 to-red-500 py-2 px-3 hover:scale-105 transition-transform font-semibold text-white">
+          {noteToEdit ? "Save" : "Create note"}
         </button>
-      </div>
-      <label className="mt-3 font-semibold text-lg" htmlFor="title">
-        Title
-      </label>
-      <input
-        className="bg-gray-600 rounded-md p-2 text-white mb-2"
-        {...register("title", { required: "The title is required" })}
-        type="text"
-      />
-      {errors.title && (
-        <p className="font-bold text-sm text-red-500">{errors.title.message}</p>
-      )}
-
-      <label className="mt-3 font-semibold text-lg" htmlFor="textArea">
-        Text
-      </label>
-      <textarea
-        className="bg-gray-600 rounded-md p-2 text-white mb-4"
-        {...register("text")}
-        cols={5}
-        rows={5}></textarea>
-
-      <button
-        disabled={isSubmitting}
-        className="self-center rounded-lg bg-gradient-to-tr from-red-600 to-red-500 py-2 px-3 hover:scale-105 transition-transform font-semibold text-white">
-        {noteToEdit ? "Save" : "Create note"}
-      </button>
-    </form>
+      </form>
+    </div>
   );
 };
 export default FormModal;

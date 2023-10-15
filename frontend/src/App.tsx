@@ -32,7 +32,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-800 via-gray-800 to-gray-700 font-['Poppins']">
+    <div className="relative flex flex-col min-h-screen bg-gradient-to-b from-gray-800 via-gray-800 to-gray-700 font-['Poppins']">
       <Navbar />
 
       <main className="flex-auto pt-4 pb-8 px-4 sm:px-8 max-w-7xl mx-auto">
