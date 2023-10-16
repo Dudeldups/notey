@@ -1,6 +1,10 @@
+import { signUp } from "./../../../backend/src/controllers/users";
 import { Note } from "../models/note";
+import { User } from "../models/user";
 
-const apiString = "http://localhost:5000/api/notes/";
+const apiString = "http://localhost:5000/api/";
+const userApiString = apiString + "users/";
+const notesApiString = apiString + "notes/";
 
 async function fetchData(input: RequestInfo, init?: RequestInit) {
   const response = await fetch(input, init);
@@ -14,8 +18,58 @@ async function fetchData(input: RequestInfo, init?: RequestInit) {
   }
 }
 
+// *
+// * endpoints for users
+// *
+
+export async function getLoggedInUser(): Promise<User> {
+  const response = await fetchData(userApiString, { method: "GET" });
+  return response.json();
+}
+
+export interface SignUpCredentials {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export async function signUp(credentials: SignUpCredentials): Promise<User> {
+  const response = await fetchData(userApiString + "signup", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
+  return response.json();
+}
+
+export interface LoginCredentials {
+  username: string;
+  password: string;
+}
+
+export async function login(credentials: LoginCredentials): Promise<User> {
+  const response = await fetchData(userApiString + "login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
+  return response.json();
+}
+
+export async function logout() {
+  await fetchData(userApiString + "logout", { method: "POST" });
+}
+
+// *
+// * endpoints for notes
+// *
+
 export async function fetchNotes(): Promise<Note[]> {
-  const response = await fetchData(apiString, {
+  const response = await fetchData(notesApiString, {
     method: "GET",
   });
 
@@ -28,7 +82,7 @@ export interface NoteInput {
 }
 
 export async function createNote(note: NoteInput): Promise<Note> {
-  const response = await fetchData(apiString, {
+  const response = await fetchData(notesApiString, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -39,14 +93,14 @@ export async function createNote(note: NoteInput): Promise<Note> {
 }
 
 export async function deleteNote(noteId: string) {
-  await fetchData(apiString + noteId, { method: "DELETE" });
+  await fetchData(notesApiString + noteId, { method: "DELETE" });
 }
 
 export async function updateNote(
   noteId: string,
   note: NoteInput
 ): Promise<Note> {
-  const response = await fetchData(apiString + noteId, {
+  const response = await fetchData(notesApiString + noteId, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
