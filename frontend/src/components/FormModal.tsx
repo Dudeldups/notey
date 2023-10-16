@@ -43,13 +43,13 @@ const FormModal = ({
 
   return (
     <div
-      className="absolute bg-gray-800 bg-opacity-30 inset-0 px-4 py-40"
+      className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-30 backdrop-blur-sm"
       onClick={dismissModal}>
       <form
         onSubmit={handleSubmit(onSubmit)}
         onClick={e => e.stopPropagation()}
-        className="bg-gray-900 flex flex-col p-4 text-white max-w-xl mx-auto">
-        <div className="flex justify-between">
+        className="bg-gray-900 flex flex-col p-4 text-white w-4/5 max-w-xl shadow-2xl ring-4 ring-neutral-100 ring-offset-1 rounded-md">
+        <div className="flex gap-3 justify-between">
           <h2 className="font-bold text-xl">
             {noteToEdit ? "Edit note" : "Add a new note"}
           </h2>

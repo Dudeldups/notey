@@ -6,9 +6,12 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import FormModal from "./components/FormModal";
 import { FaPlus } from "react-icons/fa";
+import { ImSpinner6 } from "react-icons/im";
 
 function App() {
   const [notes, setNotes] = useState<NoteModel[]>([]);
+  const [isNotesLoading, setIsNotesLoading] = useState(true);
+  const [showNotesLoadingError, setShowNotesLoadingError] = useState(false);
 
   const [showFormModal, setShowFormModal] = useState(false);
 
@@ -16,11 +19,28 @@ function App() {
 
   useEffect(() => {
     async function loadNotes() {
-      const notes = await NotesApi.fetchNotes();
-      setNotes(notes);
+      try {
+        setShowNotesLoadingError(false);
+        setIsNotesLoading(true);
+        const notes = await NotesApi.fetchNotes();
+        setNotes(notes);
+      } catch (error) {
+        console.error(error);
+        setShowNotesLoadingError(true);
+      } finally {
+        setIsNotesLoading(false);
+      }
     }
     loadNotes();
   }, []);
+
+  useEffect(() => {
+    if (showFormModal || !!noteToEdit) {
+      document.body.classList.add("overflow-y-hidden");
+    } else {
+      document.body.classList.remove("overflow-y-hidden");
+    }
+  }, [showFormModal, noteToEdit]);
 
   async function deleteHandler(note: NoteModel) {
     try {
@@ -30,6 +50,19 @@ function App() {
       console.error(error);
     }
   }
+
+  const notesGrid = (
+    <div className="grid gap-y-6 gap-x-4 sm:grid-cols-[repeat(auto-fit,minmax(19rem,1fr))]">
+      {notes.map(note => (
+        <Note
+          key={note._id}
+          note={note}
+          deleteHandler={deleteHandler}
+          onNoteClicked={setNoteToEdit}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <div className="relative flex flex-col min-h-screen bg-gradient-to-b from-gray-800 via-gray-800 to-gray-700 font-['Poppins']">
@@ -51,44 +84,43 @@ function App() {
           </button>
         </div>
 
-        <div className="grid gap-y-6 gap-x-4 sm:grid-cols-[repeat(auto-fit,minmax(19rem,1fr))]">
-          {notes.map(note => (
-            <Note
-              key={note._id}
-              note={note}
-              deleteHandler={deleteHandler}
-              onNoteClicked={setNoteToEdit}
-            />
-          ))}
-        </div>
-
-        {showFormModal && (
-          <FormModal
-            dismissModal={() => setShowFormModal(false)}
-            onNoteSaved={newNote => {
-              setNotes([...notes, newNote]);
-              setShowFormModal(false);
-            }}
-          />
-        )}
-        {noteToEdit && (
-          <FormModal
-            noteToEdit={noteToEdit}
-            dismissModal={() => {
-              setNoteToEdit(null);
-              setShowFormModal(false);
-            }}
-            onNoteSaved={updatedNote => {
-              setNotes(
-                notes.map(n => (n._id === updatedNote._id ? updatedNote : n))
-              );
-              setNoteToEdit(null);
-            }}
-          />
+        {isNotesLoading ? (
+          <ImSpinner6 className="text-3xl text-white animate-spin mx-auto" />
+        ) : showNotesLoadingError ? (
+          <p className="text-center text-xl">
+            Something went wrong. Please refresh the page.
+          </p>
+        ) : (
+          notesGrid
         )}
       </main>
 
       <Footer />
+
+      {showFormModal && (
+        <FormModal
+          dismissModal={() => setShowFormModal(false)}
+          onNoteSaved={newNote => {
+            setNotes([...notes, newNote]);
+            setShowFormModal(false);
+          }}
+        />
+      )}
+      {noteToEdit && (
+        <FormModal
+          noteToEdit={noteToEdit}
+          dismissModal={() => {
+            setNoteToEdit(null);
+            setShowFormModal(false);
+          }}
+          onNoteSaved={updatedNote => {
+            setNotes(
+              notes.map(n => (n._id === updatedNote._id ? updatedNote : n))
+            );
+            setNoteToEdit(null);
+          }}
+        />
+      )}
     </div>
   );
 }
